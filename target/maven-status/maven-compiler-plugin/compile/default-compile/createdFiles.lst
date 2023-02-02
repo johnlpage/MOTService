@@ -1,0 +1,5 @@
+com/johnlpage/mongodb/motservice/CommandLineOptions.class
+com/johnlpage/mongodb/motservice/MOTService.class
+com/johnlpage/mongodb/motservice/MOTFetcherInterface.class
+com/johnlpage/mongodb/motservice/TestWorker.class
+com/johnlpage/mongodb/motservice/MongoDBFetcher.class
