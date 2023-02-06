@@ -68,5 +68,17 @@ export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.352.b08-2.amzn2.0.1.x86_6
 mvn clean package
 ```
 
+Run RDS Test (and warm DB)
+--------------------------
+```
+java -jar bin/MOTService.jar -t 64 -r 64000 -u  "jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=false&zeroDateTimeBehavior=convertToNull" 
+
+```
+
 Migrate data into Atlas
 ------------------------
+
+```
+
+
+```
