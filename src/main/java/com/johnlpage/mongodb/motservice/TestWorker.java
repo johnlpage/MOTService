@@ -30,7 +30,8 @@ public class TestWorker implements Runnable  {
         for(int i=0;i<itterations;i++) {
             int idIndex =ThreadLocalRandom.current().nextInt(0, vehicleids.length);
             json = this.fetcher.getMOTResultInJSON(""+vehicleids[idIndex]);
+            
         }
-        this.logger.info(json); //This is there to ensure it's actually working
+       // this.logger.info(json); //This is there to ensure it's actually working
     }
 }

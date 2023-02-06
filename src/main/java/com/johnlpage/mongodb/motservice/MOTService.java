@@ -24,6 +24,7 @@ public class MOTService {
 	private static CommandLineOptions options;
 	private static MOTFetcherInterface fetcher;
 
+
 	public static void main(String[] args) {
 		LogManager.getLogManager().reset();
 		Logger logger = LoggerFactory.getLogger(MOTService.class);
@@ -44,7 +45,13 @@ public class MOTService {
 			System.err.println("You must supply database connection details with -u");
 			System.exit(1);
 		}
-		if (options.getURI().startsWith("mongodb")) {
+
+		if(options.getDestURI() != null) {
+			logger.info("Data Migration Detected");
+			Migrator migrator = new Migrator(options.getURI(),options.getDestURI());
+			migrator.migrateData();
+			return;
+		} else  if (options.getURI().startsWith("mongodb")) {
 			logger.info("MongoDB URI Detected");
 			fetcher = new MongoDBFetcher(options.getURI());
 			if (fetcher.initialised() == false) {
@@ -54,6 +61,11 @@ public class MOTService {
 			
 		} else if (options.getURI().startsWith("jdbc")) {
 			logger.info("JDBC Connection String Detected");
+			fetcher = new JDBCFetcher(options.getURI());
+			if (fetcher.initialised() == false) {
+				logger.error("Could not connect to RDBMS");
+				System.exit(1);
+			}
 		} else {
 			logger.error("Unrecognised Connection Details supplied, exiting.");
 			System.err.println("Supplied connection details must start with jdbc: or mongodb: (or mongodb+srv:)");
@@ -68,7 +80,9 @@ public class MOTService {
 
 			});
 
-		} else {
+		} 
+		
+		else {
 
 			//Get the set of unique Vehicle Identifiers so we can always choose
 			//and Existing One
@@ -80,13 +94,25 @@ public class MOTService {
 			int NITTERATIONS = options.getnRequests() / NTHREADS;
 			ExecutorService executorService = Executors.newFixedThreadPool(NTHREADS);
 			List<TestWorker> workers = new ArrayList<TestWorker>();
+
+			
+
 			for (int t = 0; t < NTHREADS; t++) {
+				
+				//In MongoDB the database connection is thread safe, has a conneciton pool and should be a Singleton.
+				// In MySQL/JDBC this is very much not true and we need one per thread
+				if(options.getURI().startsWith("jdbc")) {
+					fetcher = new JDBCFetcher(options.getURI());
+				}
 				TestWorker tw = new TestWorker(fetcher, vehicleids, NITTERATIONS);
 				workers.add(tw);
+				
+			}
+			logger.info("Ready...Steady...GO!");
+			long startTime = System.nanoTime();
+			for(TestWorker tw: workers) {
 				executorService.execute(tw); // calls run()
 			}
-			long startTime = System.nanoTime();
-
 			executorService.shutdown();
 			try {
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);

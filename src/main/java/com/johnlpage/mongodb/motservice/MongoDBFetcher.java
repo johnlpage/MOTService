@@ -28,6 +28,7 @@ public class MongoDBFetcher implements MOTFetcherInterface {
     private final String databaseName = "mot";
     private final String collectionName = "testresult";
 
+
     /*
      * We use RawBSONDocument Here not Document (or a speciic Class) as
      * we want to convert it directly into JSON and that's all - so rather than
@@ -62,6 +63,8 @@ public class MongoDBFetcher implements MOTFetcherInterface {
 
     @Override
     public String getMOTResultInJSON(String identifier) {
+
+
         long identifierLong;
         try {
             identifierLong = Long.valueOf(identifier);
@@ -80,15 +83,19 @@ public class MongoDBFetcher implements MOTFetcherInterface {
 
     @Override
     public long[] getVehicleIdentifiers() {
-        // This isn't pretty just because I want a massive array of long values in as
-        // little RAM as possible It's a Java ugliness rather than a Database one 
-
-        // The value range is potentially too large to use a BitSet - largestid is ~1.4 Bn
-        // In the data I have - that's quite sparse (40M in 1.4Bn ) also index for a BitSet
-        // is integer not long so Max size is 2.1B bits - would work but not worth the risk
-
-        // Heap used for ArrayList<Long> was  2190MB taking 92 seconds
-        // Heap used for long[] is 1663MB taking 66 seconds
+         /*
+         * This isn't pretty just because I want a massive array of long values in as
+         * little RAM as possible It's a Java ugliness rather than a Database one
+         * 
+         * The value range is potentially too large to use a BitSet - largestid is ~1.4
+         * Billion in the data I have - that's quite sparse (40M in 1.4Bn ) also index
+         * for a BitSet is integer not long so Max size is 2.1B bits - would work 
+         * but not worth the risk
+         * 
+         * Heap used for ArrayList<Long> was 2190MB taking 92 seconds
+         * Heap used for long[] is 1663MB taking 66 seconds
+         * 
+         */
     
 
         logger.info("Fetching list of Vehicle IDs from database");
@@ -112,4 +119,11 @@ public class MongoDBFetcher implements MOTFetcherInterface {
         
         return vehicleids;  
     }
+}
+
+//Used to Migrate the data into MongoDB as we were already extracting it
+
+public boolean writeBatch()
+{
+    
 }

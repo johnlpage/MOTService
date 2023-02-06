@@ -17,8 +17,13 @@ public class CommandLineOptions {
 	private boolean runWebservice = false;
 	private int nThreads = 64;
 	private int nRequests = 64000;
+	private String destURI = null;
 
 
+
+	public String getDestURI() {
+		return destURI;
+	}
 
 	public CommandLineOptions(String[] args) throws ParseException {
 		Logger logger = LoggerFactory.getLogger(CommandLineOptions.class);
@@ -31,6 +36,7 @@ public class CommandLineOptions {
 
 		cliopt.addOption("h", "help", false, "Show Help");
 		cliopt.addOption("u", "uri", true, "Database Connection String or URI");
+		cliopt.addOption("d", "dest", true, "Destnation URIL for Miration to MongoDB");
 		cliopt.addOption("w", "webservice", false, "Run an actual webservice");
 		cliopt.addOption("t", "threads", true, String.format("Number of test threads (default %d)",nThreads));
 		cliopt.addOption("r", "requests", true, String.format("Number of total requests (default %d)",nRequests));
@@ -39,6 +45,10 @@ public class CommandLineOptions {
 
 		if (cmd.hasOption("u")) {
 			databaseURI = cmd.getOptionValue("u");
+		}
+
+		if (cmd.hasOption("d")) {
+			destURI = cmd.getOptionValue("d");
 		}
 
 		if (cmd.hasOption("r")) {
