@@ -26,16 +26,31 @@ then
     curl -OL https://data.dft.gov.uk/anonymised-mot-test/lookup.zip
 fi
 
-unzip dft_test_result_2021.zip
-unzip dft_test_item_2021.zip
-unzip lookup.zip
+
+
+unzip -n dft_test_item_2021.zip
+unzip -n lookup.zip
+
 #Files are called 2022 but data is 2021
 #Combine and sort data, faster to load as explits clustered primary keys
 echo "Combining files - this can take a very long time"
-cat test_result_2022/test_result*.csv | sort -n | grep -v '^"test_id"' > test_result_2021.csv
-cat test_item_2021/test_item*.csv | sort -n | grep -v '^"test_id"' > test_item_2021.csv
+
+if [ ! -f test_result_2021.csv ]
+then
+
+    unzip -n dft_test_result_2021.zip
+    cat test_result_2022/test_result*.csv | sort -n | grep -v '^"test_id"' > test_result_2021.csv
+    rm test_result_2022/test_result*.csv
+fi
+
+if [ ! -f test_item_2021.csv ]
+then
+    unzip -n dft_test_item_2021.zip
+    cat test_item_2021/test_item*.csv | sort -n | grep -v '^"test_id"' > test_item_2021.csv
+    rm test_item_2021/test_item*.csv 
+fi
+
 echo "Files combined."
-rm test_result_2022/test_result*.csv test_item_2021/test_item*.csv 
 $MYSQLCMD < ../createmot.sql
 
 #Load the SQL
