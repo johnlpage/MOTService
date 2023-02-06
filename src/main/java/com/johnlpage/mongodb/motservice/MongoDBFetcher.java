@@ -120,10 +120,3 @@ public class MongoDBFetcher implements MOTFetcherInterface {
         return vehicleids;  
     }
 }
-
-//Used to Migrate the data into MongoDB as we were already extracting it
-
-public boolean writeBatch()
-{
-    
-}

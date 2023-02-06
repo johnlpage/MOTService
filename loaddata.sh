@@ -28,7 +28,7 @@ fi
 
 
 
-unzip -n dft_test_item_2021.zip
+
 unzip -n lookup.zip
 
 #Files are called 2022 but data is 2021
