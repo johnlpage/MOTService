@@ -50,7 +50,7 @@ public class Migrator {
             "tt.TESTTYPE AS TYPENAME, " +
             "to2.RESULT, " +
             "ti.RFRID, ti.RFRTYPE, " +
-            "fl.LAT,FL.LONGITUDINAL,fl.VERTICAL, " +
+            "fl.LAT,fl.LONGITUDINAL,fl.VERTICAL, " +
             "tid.MINORITEM,tid.RFRDESC,tid.RFRLOCMARKER,tid.RFRINSPMANDESC,tid.RFRADVISORYTEXT,tid.TSTITMSETSECID, " +
             "b.ITEMNAME AS LEVEL1, " +
             "c.ITEMNAME AS LEVEL2, " +
