@@ -31,10 +31,11 @@ unzip dft_test_item_2021.zip
 unzip lookup.zip
 #Files are called 2022 but data is 2021
 #Combine and sort data, faster to load as explits clustered primary keys
-
+echo "Combining files - this can take a very long time"
 cat test_result_2022/test_result*.csv | sort -n | grep -v '^"test_id"' > test_result_2021.csv
 cat test_item_2021/test_item*.csv | sort -n | grep -v '^"test_id"' > test_item_2021.csv
-
+echo "Files combined."
+rm test_result_2022/test_result*.csv test_item_2021/test_item*.csv 
 $MYSQLCMD < ../createmot.sql
 
 #Load the SQL
