@@ -75,10 +75,28 @@ java -jar bin/MOTService.jar -t 64 -r 64000 -u  "jdbc:mysql://admin:2efdaf4b59@j
 
 ```
 
+Start a MongoDB Atlas cluster - using M30 (2 CPU, 8GB RAM, 40GB Disk) $0.59 per hour - no additional costs (I think )
+
+
 Migrate data into Atlas
 ------------------------
 
 ```
 
+curl -OL https://repo.mongodb.org/yum/amazon/2022/mongodb-org/6.0/x86_64/RPMS/mongodb-mongosh-1.6.2.x86_64.rpm
 
+sudoo rpm -i mongodb-mongosh-1.6.2.x86_64.rpm
+
+java -jar bin/MOTService.jar -u  "jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=false&zeroDateTimeBehavior=convertToNull" -d "mongodb+srv://jlp:2efdaf4b59@speedtest.eez2n.mongodb.net"
+
+#Make the index
+
+mongosh "mongodb+srv://jlp:2efdaf4b59@speedtest.eez2n.mongodb.net/mot"  --eval 'db.testresult.createIndex({vehicleid:1})
+```
+
+Test in Atlas
+---------------
+
+```
+java -jar bin/MOTService.jar -t 64 -r 64000 -u  "mongodb+srv://jlp:2efdaf4b59@speedtest.eez2n.mongodb.net"
 ```

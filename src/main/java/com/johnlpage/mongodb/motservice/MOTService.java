@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class MOTService {
 	private static final String version = "0.0.1";
 	private static CommandLineOptions options;
-	private static MOTFetcherInterface fetcher;
+	private static MOTDataAccessInterface dal;
 
 
 	public static void main(String[] args) {
@@ -53,16 +53,16 @@ public class MOTService {
 			return;
 		} else  if (options.getURI().startsWith("mongodb")) {
 			logger.info("MongoDB URI Detected");
-			fetcher = new MongoDBFetcher(options.getURI());
-			if (fetcher.initialised() == false) {
+			dal = new MongoDBDataAccessLayer(options.getURI());
+			if (dal.initialised() == false) {
 				logger.error("Could not connect to MongoDB");
 				System.exit(1);
 			}
 			
 		} else if (options.getURI().startsWith("jdbc")) {
 			logger.info("JDBC Connection String Detected");
-			fetcher = new JDBCFetcher(options.getURI());
-			if (fetcher.initialised() == false) {
+			dal = new JDBCDataAccessLayer(options.getURI());
+			if (dal.initialised() == false) {
 				logger.error("Could not connect to RDBMS");
 				System.exit(1);
 			}
@@ -72,12 +72,21 @@ public class MOTService {
 			System.exit(1);
 		}
 
-		// Now test retrieval speed OR start a webserver
+		// Now test retrieval speed OR start a webserver. The webserver
+		// isn't for any good reason - and if you POST or PATCH it will allways 
+		// Ignore any JSON you send and update the last one read
 
 		if (options.isWebService()) {
 			get("/result/:vehicleid", (request, response) -> {
-				return fetcher.getMOTResultInJSON(request.params(":vehicleid"));
+				return dal.getMOTResultInJSON(request.params(":vehicleid"));
 
+			});
+			post("/result/:testid", (request, response) -> {
+				return dal.createNewMOTResult(Long.parseLong(":testid"));
+			});
+			
+			patch("/result/:vehicleid", (request, response) -> {
+				return dal.updateMOTResult();
 			});
 
 		} 
@@ -86,7 +95,9 @@ public class MOTService {
 
 			//Get the set of unique Vehicle Identifiers so we can always choose
 			//and Existing One
-			long[] vehicleids = fetcher.getVehicleIdentifiers();
+			dal.resetTestDatabase();
+
+			long[] vehicleids = dal.getVehicleIdentifiers();
 			logger.info(String.format("DB has %d vehicle ids", vehicleids.length));
 			logger.info(String.format("Testing retireval of %d using %d threads.",options.getnRequests(),options.getnThreads()));
 			// Multi threaded testing of speed
@@ -100,16 +111,23 @@ public class MOTService {
 			for (int t = 0; t < NTHREADS; t++) {
 				
 				//In MongoDB the database connection is thread safe, has a conneciton pool and should be a Singleton.
-				// In MySQL/JDBC this is very much not true and we need one per thread
+				// In MySQL/JDBC this is very much not true and we need one per thread - however out DAL also has some state
+				// so we are having one per thread - the MongoDB ones share the Connection object as its' static.
+
 				if(options.getURI().startsWith("jdbc")) {
-					fetcher = new JDBCFetcher(options.getURI());
+					dal = new JDBCDataAccessLayer(options.getURI());
 				}
-				TestWorker tw = new TestWorker(fetcher, vehicleids, NITTERATIONS);
+
+				if(options.getURI().startsWith("mongodb")) {
+					dal = new MongoDBDataAccessLayer(options.getURI());
+				}
+
+				TestWorker tw = new TestWorker(dal, vehicleids, NITTERATIONS,NTHREADS,t);
 				workers.add(tw);
 				
 			}
 			logger.info("Ready...Steady...GO!");
-			long startTime = System.nanoTime();
+		
 			for(TestWorker tw: workers) {
 				executorService.execute(tw); // calls run()
 			}
@@ -118,10 +136,7 @@ public class MOTService {
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			} catch (InterruptedException e) {
 			}
-			long endTime = System.nanoTime();
-			double secs = (double) (endTime - startTime) / 1000000000.0;
-			double ops = NTHREADS * NITTERATIONS;
-			logger.info(String.format("Test completed in %.3f seconds , %.0f requests, Throughput %d requests per second",secs,ops,(int)(ops/secs)));
+		
 		}
 	}
 

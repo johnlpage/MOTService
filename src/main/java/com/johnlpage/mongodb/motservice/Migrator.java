@@ -25,6 +25,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 
+import com.mongodb.client.model.Indexes;
+
 import java.sql.ResultSetMetaData;
 
 import java.sql.DriverManager;
@@ -44,31 +46,31 @@ public class Migrator {
     private final String databaseName = "mot";
     private final String collectionName = "testresult";
 
-    private final String getAllRecords = "select " +
-            "tr.*, " +
-            "ft.FUEL_TYPE, " +
-            "tt.TESTTYPE AS TYPENAME, " +
-            "to2.RESULT, " +
-            "ti.RFRID, ti.RFRTYPE, " +
-            "fl.LAT,fl.LONGITUDINAL,fl.VERTICAL, " +
-            "tid.MINORITEM,tid.RFRDESC,tid.RFRLOCMARKER,tid.RFRINSPMANDESC,tid.RFRADVISORYTEXT,tid.TSTITMSETSECID, " +
-            "b.ITEMNAME AS LEVEL1, " +
-            "c.ITEMNAME AS LEVEL2, " +
-            "d.ITEMNAME AS LEVEL3, " +
-            "e.ITEMNAME AS LEVEL4, " +
-            "f.ITEMNAME AS LEVEL5  " +
-            "from TESTRESULT tr " +
-            "LEFT JOIN TESTITEM ti  on ti.TESTID = tr.TESTID " +
-            "LEFT JOIN FUEL_TYPES ft on ft.TYPECODE = tr.FUELTYPE " +
-            "LEFT JOIN TEST_TYPES tt on tt.TYPECODE  = tr.TESTTYPE " +
-            "LEFT JOIN TEST_OUTCOME to2 on to2.RESULTCODE  = tr.TESTRESULT " +
-            "LEFT JOIN FAILURE_LOCATION fl on ti.LOCATIONID = fl.FAILURELOCATIONID " +
-            "LEFT JOIN TESTITEM_DETAIL AS tid ON ti.RFRID = tid.RFRID AND tid.TESTCLASSID = tr.TESTCLASSID " +
-            "LEFT JOIN TESTITEM_GROUP AS b ON tid.TSTITMID = b.TSTITMID AND tid.TESTCLASSID = b.TESTCLASSID " +
-            "LEFT JOIN TESTITEM_GROUP AS c ON b.PARENTID = c.TSTITMID AND b.TESTCLASSID = c.TESTCLASSID " +
-            "LEFT JOIN TESTITEM_GROUP AS d ON c.PARENTID = d.TSTITMID AND c.TESTCLASSID = d.TESTCLASSID " +
-            "LEFT JOIN TESTITEM_GROUP AS e ON d.PARENTID = e.TSTITMID AND d.TESTCLASSID = e.TESTCLASSID " +
-            "LEFT JOIN TESTITEM_GROUP AS f ON e.PARENTID = f.TSTITMID AND e.TESTCLASSID = f.TESTCLASSID ";
+    private final String getAllRecords =  "select " +
+    "tr.*, " +
+    "ft.FUEL_TYPE, " +
+    "tt.TESTTYPE AS TYPENAME, " +
+    "to2.RESULT, " +
+    "ti.*, " +
+    "fl.*, " +
+    "tid.MINORITEM,tid.RFRDESC,tid.RFRLOCMARKER,tid.RFRINSPMANDESC,tid.RFRADVISORYTEXT,tid.TSTITMSETSECID, " +
+    "b.ITEMNAME AS LEVEL1, " +
+    "c.ITEMNAME AS LEVEL2, " +
+    "d.ITEMNAME AS LEVEL3, " +
+    "e.ITEMNAME AS LEVEL4, " +
+    "f.ITEMNAME AS LEVEL5  " +
+    "from TESTRESULT tr " +
+    "LEFT JOIN TESTITEM ti  on ti.TESTID = tr.TESTID " +
+    "LEFT JOIN FUEL_TYPES ft on ft.TYPECODE = tr.FUELTYPE " +
+    "LEFT JOIN TEST_TYPES tt on tt.TYPECODE  = tr.TESTTYPE " +
+    "LEFT JOIN TEST_OUTCOME to2 on to2.RESULTCODE  = tr.TESTRESULT " +
+    "LEFT JOIN FAILURE_LOCATION fl on ti.LOCATIONID = fl.FAILURELOCATIONID " +
+    "LEFT JOIN TESTITEM_DETAIL AS tid ON ti.RFRID = tid.RFRID AND tid.TESTCLASSID = tr.TESTCLASSID " +
+    "LEFT JOIN TESTITEM_GROUP AS b ON tid.TSTITMID = b.TSTITMID AND tid.TESTCLASSID = b.TESTCLASSID " +
+    "LEFT JOIN TESTITEM_GROUP AS c ON b.PARENTID = c.TSTITMID AND b.TESTCLASSID = c.TESTCLASSID " +
+    "LEFT JOIN TESTITEM_GROUP AS d ON c.PARENTID = d.TSTITMID AND c.TESTCLASSID = d.TESTCLASSID " +
+    "LEFT JOIN TESTITEM_GROUP AS e ON d.PARENTID = e.TSTITMID AND d.TESTCLASSID = e.TESTCLASSID " +
+    "LEFT JOIN TESTITEM_GROUP AS f ON e.PARENTID = f.TSTITMID AND e.TESTCLASSID = f.TESTCLASSID " ;
 
     Migrator(String URI, String TargetURI) {
         logger = LoggerFactory.getLogger(Migrator.class);
@@ -117,11 +119,14 @@ public class Migrator {
             ResultSet testResult = getTestStmt.executeQuery();
             ResultSetMetaData metaData = testResult.getMetaData();
             // Create JSON from a set of Rows
-            String[] topFieldNames = { "TESTID", "VEHICLEID", "TESTDATE", "TESTCLASSID", "TYPENAME",
-                    "TESTMILEAGE", "POSTCODEREGION", "MAKE", "MODEL", "COLOUR", "FUEL_TYPE", "CYLCPCTY", "FIRSTUSEDATE",
+            String[] topFieldNames = { "TESTID", "VEHICLEID", "TESTTYPE", "TESTRESULT", "TESTDATE", "TESTCLASSID",
+                    "TYPENAME",
+                    "TESTMILEAGE", "POSTCODEREGION", "MAKE", "MODEL", "COLOUR", "FUELTYPE", "FUEL_TYPE", "CYLCPCTY",
+                    "FIRSTUSEDATE",
                     "RESULT" };
 
-            String[] itemFieldNames = { "RFRID", "RFRTYPE", "LAT", "LONGITUDINAL", "VERTICAL", "MINORITEM", "RFRDESC",
+            String[] itemFieldNames = { "RFRID", "RFRTYPE", "DMARK", "LOCATIONID", "LAT", "LONGITUDINAL", "VERTICAL",
+                    "MINORITEM", "RFRDESC",
                     "RFRLOCMARKER",
                     "RFRINSPMANDESC", "RFRADVISORYTEXT", "LEVEL1", "LEVEL2", "LEVEL3", "LEVEL4", "LEVEL5" };
 
@@ -131,10 +136,12 @@ public class Migrator {
             while (testResult.next()) {
                 // Are we starting a new Test?
                 Long testId = testResult.getLong("TESTID");
-                if (! testId.equals(currentTestId)) {
-                   
+                if (!testId.equals(currentTestId)) {
+
                     if (mongoDoc != null) {
                         mongoDoc.append("testitems", itemList);
+                        // Also as the PK is _id in MongoDB copy testid in there
+                        mongoDoc.put("_id",mongoDoc.get("testid"));
                         insertBatch.add(mongoDoc);
                         if (insertBatch.size() == 1000) {
                             destinationCollection.insertMany(insertBatch);
@@ -146,12 +153,12 @@ public class Migrator {
                     mongoDoc = new Document();
                     firstRow = true;
                     itemList = new ArrayList<Document>();
-                   
+
                     currentTestId = testId;
                 }
 
                 Document itemDoc = new Document(); // New Item per row
-                
+
                 for (int col = 1; col <= metaData.getColumnCount(); col++) {
                     String label = metaData.getColumnLabel(col);
 
@@ -181,6 +188,18 @@ public class Migrator {
             }
 
             testResult.close();
+
+            // Write any remaining records to MongoDB
+            if (insertBatch.size() >0 ) {
+                destinationCollection.insertMany(insertBatch);
+                count = count + insertBatch.size();
+                logger.info("Migrated " + count);
+            }
+
+            /* Add an index on vehicleid */
+            logger.info("Creating index on vehicleid field");
+            destinationCollection.createIndex(Indexes.ascending("vehicleid"));
+            logger.info("Index complete");
             return true;
         } catch (Exception e) {
             e.printStackTrace();
