@@ -52,15 +52,16 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
             logger.info(mongoClient.getDatabase("admin").runCommand(new Document("ping", 1)).toJson());
             //Use this for reading - don't auto parse the repsonse into Objects
             testresults = mongoClient.getDatabase(databaseName).getCollection(collectionName, RawBsonDocument.class);
-            
-            //Use this one for writing
-            testresultsw = mongoClient.getDatabase(databaseName).getCollection(collectionName);
             if(readFromSecondariesToo){
                 //We can say read from any secondary that is no more than X millis behind in replicaiton.
                 //or 0 for anything
                 logger.info("Setting Read Preference to nearest");
-                testresultsw =   testresultsw.withReadPreference(ReadPreference.nearest(120,TimeUnit.SECONDS));
+                testresults =   testresults.withReadPreference(ReadPreference.nearest());
             }
+
+            //Use this one for writing 
+            testresultsw = mongoClient.getDatabase(databaseName).getCollection(collectionName);
+            
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
             mongoClient = null;
