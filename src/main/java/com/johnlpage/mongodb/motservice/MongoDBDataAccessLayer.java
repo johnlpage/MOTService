@@ -2,10 +2,13 @@ package com.johnlpage.mongodb.motservice;
 
 import static com.mongodb.client.model.Projections.*;
 
+import java.util.concurrent.TimeUnit;
+
 import org.bson.Document;
 import org.bson.RawBsonDocument;
 import org.bson.conversions.Bson;
 
+import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -37,7 +40,7 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
     private MongoCollection<RawBsonDocument> testresults;
     private MongoCollection<Document> testresultsw;
 
-    MongoDBDataAccessLayer(String URI) {
+    MongoDBDataAccessLayer(String URI,boolean readFromSecondariesToo) {
         logger = LoggerFactory.getLogger(MongoDBDataAccessLayer.class);
 
 
@@ -47,9 +50,16 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
             // server
             // This will also fail with incorrect auth - although not with No Auth
             logger.info(mongoClient.getDatabase("admin").runCommand(new Document("ping", 1)).toJson());
+            //Use this for reading - don't auto parse the repsonse into Objects
             testresults = mongoClient.getDatabase(databaseName).getCollection(collectionName, RawBsonDocument.class);
+            
+            //Use this one for writing
             testresultsw = mongoClient.getDatabase(databaseName).getCollection(collectionName);
-
+            if(readFromSecondariesToo){
+                //We can say read from any secondary that is no more than X millis behind in replicaiton.
+                //or 0 for anything
+                testresultsw =   testresultsw.withReadPreference(ReadPreference.nearest(0,TimeUnit.MILLISECONDS));
+            }
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
             mongoClient = null;

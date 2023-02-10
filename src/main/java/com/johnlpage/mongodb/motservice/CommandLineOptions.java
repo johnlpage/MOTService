@@ -21,7 +21,20 @@ public class CommandLineOptions {
 	private int readRatio = 80;
 	private int createRatio = 15;
 	private int updateRatio = 5;
+	private boolean readReplicas = false;
+	private String replicaList = null;
 	
+	
+	public String getReplicaList() {
+		return replicaList;
+	}
+
+
+	public boolean isReadReplicas() {
+		return readReplicas;
+	}
+
+
 	public int getReadRatio() {
 		return readRatio;
 	}
@@ -57,11 +70,19 @@ public class CommandLineOptions {
 		cliopt.addOption("c", "createratio", true, String.format("Ratio of create operations (default %d)",createRatio));
 		cliopt.addOption("r", "readratio", true, String.format("Ratio of read operations (default %d)",readRatio));
 		cliopt.addOption("m", "updateratio", true, String.format("Ratio of update/modify operations (default %d)",updateRatio));
-	
+		cliopt.addOption("x", "distributereads", true, "Include reading from replicas for RDBMS list URI's as comma seperated list");
 		CommandLine cmd = parser.parse(cliopt, args);
 
 		if (cmd.hasOption("u")) {
 			databaseURI = cmd.getOptionValue("u");
+		}
+		
+		if (cmd.hasOption("x")) {
+			readReplicas = true;
+			if( cmd.getOptionValue("x") != null)
+			{
+				replicaList =  cmd.getOptionValue("x");
+			}
 		}
 
 		if (cmd.hasOption("d")) {

@@ -2,6 +2,9 @@ package com.johnlpage.mongodb.motservice;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.ArrayList;
+
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,7 +17,7 @@ import org.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.util.concurrent.ThreadLocalRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,11 +32,11 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
     boolean initialised = false;
     boolean isMySQL = false;
     private Connection connection = null;
-    PreparedStatement getTestStmt = null;
+    private List<PreparedStatement> readConnections = null;
+
     PreparedStatement insertResultStmt = null;
     PreparedStatement insertItemStmt = null;
     PreparedStatement updateStmt = null;
-
 
     JSONObject jsonObj = null; /*
                                 * Keep the last thing we read so we can base a write off it ,
@@ -75,7 +78,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
 
     private final String updateResultSQL = "UPDATE TESTRESULT SET TESTMILEAGE = TESTMILEAGE+1 WHERE TESTID= ?";
 
-    JDBCDataAccessLayer(String URI) {
+    JDBCDataAccessLayer(String URI, String replicaURIs) {
         logger = LoggerFactory.getLogger(JDBCDataAccessLayer.class);
 
         try {
@@ -85,9 +88,23 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             }
             connection = DriverManager.getConnection(URI);
             connection.setAutoCommit(false);
-
-            getTestStmt = connection.prepareStatement(getlatestByVehicleSQL, java.sql.ResultSet.TYPE_FORWARD_ONLY,
+            readConnections = new ArrayList<PreparedStatement>();
+            PreparedStatement getTestStmt = connection.prepareStatement(getlatestByVehicleSQL,
+                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
                     java.sql.ResultSet.CONCUR_READ_ONLY);
+            readConnections.add(getTestStmt);
+
+            if (replicaURIs != null) {
+
+                String[] connectionStrings = replicaURIs.split(",");
+                for (String c : Arrays.asList(connectionStrings)) {
+                    Connection newCon = DriverManager.getConnection(c);
+                    PreparedStatement getTestStmtRep = newCon.prepareStatement(getlatestByVehicleSQL,
+                            java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                            java.sql.ResultSet.CONCUR_READ_ONLY);
+                    readConnections.add(getTestStmtRep);
+                }
+            }
 
             insertResultStmt = connection.prepareStatement(insertResultSQL, java.sql.ResultSet.TYPE_FORWARD_ONLY,
                     java.sql.ResultSet.CONCUR_READ_ONLY);
@@ -156,7 +173,6 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             return false; /* We havent read one */
         try {
 
-         
             JSONArray items = jsonObj.optJSONArray("testitems");
 
             String resultFields[] = { "TESTID", "VEHICLEID", "TESTDATE", "TESTCLASSID", "TESTTYPE", "TESTRESULT",
@@ -211,7 +227,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             return false; /* We havent read one */
 
         long testId = jsonObj.getLong("testid");
-        
+
         try {
             updateStmt.setLong(1, testId);
             updateStmt.execute();
@@ -231,7 +247,8 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
         // Check we aren't a new thread - if we are we need a new conneciton.
         try {
             identifierLong = Long.valueOf(identifier);
-
+            //Pick a prepared statement from out list of readers randomly
+            PreparedStatement getTestStmt = readConnections.get(ThreadLocalRandom.current().nextInt(0, readConnections.size()));
             getTestStmt.setLong(1, identifierLong);
             ResultSet testResult = getTestStmt.executeQuery();
             ResultSetMetaData metaData = testResult.getMetaData();

@@ -52,7 +52,7 @@ public class MOTService {
 			return;
 		} else if (options.getURI().startsWith("mongodb")) {
 			logger.info("MongoDB URI Detected");
-			dal = new MongoDBDataAccessLayer(options.getURI());
+			dal = new MongoDBDataAccessLayer(options.getURI(),options.isReadReplicas());
 			if (dal.initialised() == false) {
 				logger.error("Could not connect to MongoDB");
 				System.exit(1);
@@ -60,7 +60,7 @@ public class MOTService {
 
 		} else if (options.getURI().startsWith("jdbc")) {
 			logger.info("JDBC Connection String Detected");
-			dal = new JDBCDataAccessLayer(options.getURI());
+			dal = new JDBCDataAccessLayer(options.getURI(),options.getReplicaList());
 			if (dal.initialised() == false) {
 				logger.error("Could not connect to RDBMS");
 				System.exit(1);
@@ -98,6 +98,7 @@ public class MOTService {
 					options.getnThreads()));
 			logger.info(String.format("Ratio of Create/Read/Update is %d : %d : %d ", options.getCreateRatio(),
 					options.getReadRatio(), options.getUpdateRatio()));
+			logger.info(String.format("Allowing reads from Replicas? %s",options.isReadReplicas()?"Yes":"No"));
 			logger.info("Preparing for test, this can take some time ....");
 			dal.resetTestDatabase();
 
@@ -118,11 +119,11 @@ public class MOTService {
 				// object as it's a static memeber
 
 				if (options.getURI().startsWith("jdbc")) {
-					dal = new JDBCDataAccessLayer(options.getURI());
+					dal = new JDBCDataAccessLayer(options.getURI(),options.getReplicaList());
 				}
 
 				if (options.getURI().startsWith("mongodb")) {
-					dal = new MongoDBDataAccessLayer(options.getURI());
+					dal = new MongoDBDataAccessLayer(options.getURI(),options.isReadReplicas());
 				}
 
 				TestWorker tw = new TestWorker(dal, vehicleids, options, threadNo);
