@@ -9,60 +9,60 @@ import ch.qos.logback.classic.Logger;
 
 public class TestWorker implements Runnable {
     MOTDataAccessInterface motdal;
-    int itterations;
+    int itterations = 0;
     long[] vehicleids;
     Logger logger;
     int threadNo;
-    int nThreads;
+    CommandLineOptions options;
     long newTestId = 2000000000L;
 
-    public TestWorker(MOTDataAccessInterface fetcher, long[] vehicleids, int itterations,int nThreads,int threadNo) {
+    public TestWorker(MOTDataAccessInterface fetcher, long[] vehicleids, CommandLineOptions options, int threadNo) {
         this.motdal = fetcher;
         this.threadNo = threadNo;
-        this.nThreads=nThreads;
-        this.itterations = itterations;
+        this.options = options;
         this.vehicleids = vehicleids;
         newTestId += threadNo;
-        LogManager.getLogManager().reset();
         this.logger = (Logger) LoggerFactory.getLogger(TestWorker.class);
-
     }
 
     public void run() {
         // If these add up to 100 it's easier to think about
         // Insert and Update make individual calls to the server
-        //So this would not be the way to test/code for bulk insert speed for example 
+        // So this would not be the way to test/code for bulk insert speed for example
 
-        final int READ_RATIO = 80;
-        final int INSERT_RATIO = 15;
-        final int UPDATE_RATIO = 5;
-
-        
+        int READ_RATIO = options.getReadRatio();
+        int INSERT_RATIO = options.getCreateRatio();
+        int UPDATE_RATIO = options.getUpdateRatio();
 
         String json = new String("ERROR FETCHING JSON");
         // Timing from inside one testworker
 
-        long startTime = System.nanoTime();
-        for (int i = 0; i < itterations; i++) {
+        long startTime = System.currentTimeMillis(); // Cheap but less aggurate than nanotime good enough
+        long endTime = startTime + options.getTestLength() * 1000;
+
+        while (System.currentTimeMillis() < endTime) {
             int operation = ThreadLocalRandom.current().nextInt(0, READ_RATIO + UPDATE_RATIO + INSERT_RATIO);
 
             if (operation < READ_RATIO) {
                 int idIndex = ThreadLocalRandom.current().nextInt(0, vehicleids.length);
-               
+
                 json = this.motdal.getMOTResultInJSON("" + vehicleids[idIndex]);
-              
+
             } else if (operation < READ_RATIO + UPDATE_RATIO) {
                 this.motdal.createNewMOTResult(newTestId);
-                newTestId += nThreads;
+                newTestId += options.getnThreads();
             } else {
-                
+
                 this.motdal.updateMOTResult();
             }
+            itterations++;
         }
-        long endTime = System.nanoTime();
-        double secs = (double) (endTime - startTime) / 1000000000.0;
-        if(threadNo == 0) {
-            logger.info(String.format("Mixed workload completed in %.3f seconds , %d requests, Throughput %d requests per second",secs,itterations*nThreads,(int)((double)(nThreads*itterations)/secs)));
+
+        if (threadNo == 0) {
+            logger.info(String.format("Test length %d seconds, %d total requests. Throughput %d requests per second",
+                    options.getTestLength(),
+                    itterations * options.getnThreads(),
+                    itterations * options.getnThreads() / options.getTestLength()));
             this.logger.debug(json); // This is there to ensure it's actually working
         }
     }

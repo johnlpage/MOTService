@@ -5,7 +5,7 @@ Start an EC2 instance in the region you want to use, ensure it is large enough
 20 GB Disk, 4GB RAM at least.
 
 
-Install MySQL  client
+Install MySQL  client on EC2
 ----------------------
 ```
 
@@ -71,7 +71,7 @@ mvn clean package
 Run RDS Test (and warm DB)
 --------------------------
 ```
-java -jar bin/MOTService.jar -t 64 -r 64000 -u  "jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=false&zeroDateTimeBehavior=convertToNull" 
+java -jar bin/MOTService.jar -t 64 -u  "jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=false&zeroDateTimeBehavior=convertToNull" 
 
 ```
 
@@ -98,5 +98,5 @@ Test in Atlas
 ---------------
 
 ```
-java -jar bin/MOTService.jar -t 64 -r 64000 -u  "mongodb+srv://jlp:2efdaf4b59@speedtest.eez2n.mongodb.net"
+java -jar bin/MOTService.jar -t 64 -u  "mongodb+srv://jlp:2efdaf4b59@speedtest.eez2n.mongodb.net"
 ```

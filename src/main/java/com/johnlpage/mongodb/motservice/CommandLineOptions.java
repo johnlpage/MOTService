@@ -16,10 +16,24 @@ public class CommandLineOptions {
 	private String databaseURI = null;
 	private boolean runWebservice = false;
 	private int nThreads = 64;
-	private int nRequests = 64000;
+	private int testSeconds = 600;
 	private String destURI = null;
+	private int readRatio = 80;
+	private int createRatio = 15;
+	private int updateRatio = 5;
+	
+	public int getReadRatio() {
+		return readRatio;
+	}
 
 
+	public int getCreateRatio() {
+		return createRatio;
+	}
+
+	public int getUpdateRatio() {
+		return updateRatio;
+	}
 
 	public String getDestURI() {
 		return destURI;
@@ -39,7 +53,10 @@ public class CommandLineOptions {
 		cliopt.addOption("d", "dest", true, "Destnation URIL for Miration to MongoDB");
 		cliopt.addOption("w", "webservice", false, "Run an actual webservice");
 		cliopt.addOption("t", "threads", true, String.format("Number of test threads (default %d)",nThreads));
-		cliopt.addOption("r", "requests", true, String.format("Number of total requests (default %d)",nRequests));
+		cliopt.addOption("s", "seconds", true, String.format("Number of seconds to run the test for (default %d)",testSeconds));
+		cliopt.addOption("c", "createratio", true, String.format("Ratio of create operations (default %d)",createRatio));
+		cliopt.addOption("r", "readratio", true, String.format("Ratio of read operations (default %d)",readRatio));
+		cliopt.addOption("m", "updateratio", true, String.format("Ratio of update/modify operations (default %d)",updateRatio));
 	
 		CommandLine cmd = parser.parse(cliopt, args);
 
@@ -51,8 +68,20 @@ public class CommandLineOptions {
 			destURI = cmd.getOptionValue("d");
 		}
 
+		if (cmd.hasOption("s")) {
+			testSeconds = Integer.parseInt(cmd.getOptionValue("s"));
+		}
+
+		if (cmd.hasOption("c")) {
+			createRatio = Integer.parseInt(cmd.getOptionValue("c"));
+		}
+
 		if (cmd.hasOption("r")) {
-			nRequests = Integer.parseInt(cmd.getOptionValue("r"));
+			readRatio = Integer.parseInt(cmd.getOptionValue("r"));
+		}
+
+		if (cmd.hasOption("m")) {
+			updateRatio = Integer.parseInt(cmd.getOptionValue("m"));
 		}
 
 		if (cmd.hasOption("t")) {
@@ -74,8 +103,8 @@ public class CommandLineOptions {
 		return nThreads;
 	}
 
-	public int getnRequests() {
-		return nRequests;
+	public int getTestLength() {
+		return testSeconds;
 	}
 
 	public boolean isWebService()

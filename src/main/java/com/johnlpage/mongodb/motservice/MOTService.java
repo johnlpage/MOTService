@@ -24,7 +24,6 @@ public class MOTService {
 	private static CommandLineOptions options;
 	private static MOTDataAccessInterface dal;
 
-
 	public static void main(String[] args) {
 		LogManager.getLogManager().reset();
 		Logger logger = LoggerFactory.getLogger(MOTService.class);
@@ -46,19 +45,19 @@ public class MOTService {
 			System.exit(1);
 		}
 
-		if(options.getDestURI() != null) {
+		if (options.getDestURI() != null) {
 			logger.info("Data Migration Detected");
-			Migrator migrator = new Migrator(options.getURI(),options.getDestURI());
+			Migrator migrator = new Migrator(options.getURI(), options.getDestURI());
 			migrator.migrateData();
 			return;
-		} else  if (options.getURI().startsWith("mongodb")) {
+		} else if (options.getURI().startsWith("mongodb")) {
 			logger.info("MongoDB URI Detected");
 			dal = new MongoDBDataAccessLayer(options.getURI());
 			if (dal.initialised() == false) {
 				logger.error("Could not connect to MongoDB");
 				System.exit(1);
 			}
-			
+
 		} else if (options.getURI().startsWith("jdbc")) {
 			logger.info("JDBC Connection String Detected");
 			dal = new JDBCDataAccessLayer(options.getURI());
@@ -73,7 +72,7 @@ public class MOTService {
 		}
 
 		// Now test retrieval speed OR start a webserver. The webserver
-		// isn't for any good reason - and if you POST or PATCH it will allways 
+		// isn't for any good reason - and if you POST or PATCH it will allways
 		// Ignore any JSON you send and update the last one read
 
 		if (options.isWebService()) {
@@ -84,51 +83,55 @@ public class MOTService {
 			post("/result/:testid", (request, response) -> {
 				return dal.createNewMOTResult(Long.parseLong(":testid"));
 			});
-			
+
 			patch("/result/:vehicleid", (request, response) -> {
 				return dal.updateMOTResult();
 			});
 
-		} 
-		
+		}
+
 		else {
 
-			//Get the set of unique Vehicle Identifiers so we can always choose
-			//and Existing One
+			// Get the set of unique Vehicle Identifiers so we can always choose
+			// and Existing One
+			logger.info(String.format("Testing for %d seconds with %d client threads.", options.getTestLength(),
+					options.getnThreads()));
+			logger.info(String.format("Ratio of Create/Read/Update is %d : %d : %d ", options.getCreateRatio(),
+					options.getReadRatio(), options.getUpdateRatio()));
+			logger.info("Preparing for test, this can take some time ....");
 			dal.resetTestDatabase();
 
 			long[] vehicleids = dal.getVehicleIdentifiers();
 			logger.info(String.format("DB has %d vehicle ids", vehicleids.length));
-			logger.info(String.format("Testing retireval of %d using %d threads.",options.getnRequests(),options.getnThreads()));
 			// Multi threaded testing of speed
-			int NTHREADS = options.getnThreads();
-			int NITTERATIONS = options.getnRequests() / NTHREADS;
-			ExecutorService executorService = Executors.newFixedThreadPool(NTHREADS);
+
+			ExecutorService executorService = Executors.newFixedThreadPool(options.getnThreads());
 			List<TestWorker> workers = new ArrayList<TestWorker>();
 
-			
+			for (int threadNo = 0; threadNo < options.getnThreads(); threadNo++) {
 
-			for (int t = 0; t < NTHREADS; t++) {
-				
-				//In MongoDB the database connection is thread safe, has a conneciton pool and should be a Singleton.
-				// In MySQL/JDBC this is very much not true and we need one per thread - however out DAL also has some state
-				// so we are having one per thread - the MongoDB ones share the Connection object as its' static.
+				// In MongoDB the database connection is thread safe, has a conneciton pool and
+				// should be a Singleton.
+				// In MySQL/JDBC this is very much not true and we need one per thread - however
+				// out DAL also has some state
+				// so we are having one DAL per thread - the MongoDB ones share the Connection
+				// object as it's a static memeber
 
-				if(options.getURI().startsWith("jdbc")) {
+				if (options.getURI().startsWith("jdbc")) {
 					dal = new JDBCDataAccessLayer(options.getURI());
 				}
 
-				if(options.getURI().startsWith("mongodb")) {
+				if (options.getURI().startsWith("mongodb")) {
 					dal = new MongoDBDataAccessLayer(options.getURI());
 				}
 
-				TestWorker tw = new TestWorker(dal, vehicleids, NITTERATIONS,NTHREADS,t);
+				TestWorker tw = new TestWorker(dal, vehicleids, options, threadNo);
 				workers.add(tw);
-				
+
 			}
 			logger.info("Ready...Steady...GO!");
-		
-			for(TestWorker tw: workers) {
+
+			for (TestWorker tw : workers) {
 				executorService.execute(tw); // calls run()
 			}
 			executorService.shutdown();
@@ -136,7 +139,7 @@ public class MOTService {
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			} catch (InterruptedException e) {
 			}
-		
+
 		}
 	}
 
