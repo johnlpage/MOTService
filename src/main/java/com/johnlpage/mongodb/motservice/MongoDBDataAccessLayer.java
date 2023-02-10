@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
 
-    private static MongoClient mongoClient = null; //Singleton
+    private static MongoClient mongoClient = null; // Singleton
     private Logger logger;
     private final String databaseName = "mot";
     private final String collectionName = "testresult";
@@ -40,28 +40,30 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
     private MongoCollection<RawBsonDocument> testresults;
     private MongoCollection<Document> testresultsw;
 
-    MongoDBDataAccessLayer(String URI,boolean readFromSecondariesToo) {
+    MongoDBDataAccessLayer(String URI, boolean readFromSecondariesToo) {
         logger = LoggerFactory.getLogger(MongoDBDataAccessLayer.class);
 
-
         try {
-            if (mongoClient == null) { mongoClient = MongoClients.create(URI); }
+            if (mongoClient == null) {
+                mongoClient = MongoClients.create(URI);
+            }
             // Creatinng a client doesn't actually connect until it needs to so we ping the
             // server
             // This will also fail with incorrect auth - although not with No Auth
             logger.info(mongoClient.getDatabase("admin").runCommand(new Document("ping", 1)).toJson());
-            //Use this for reading - don't auto parse the repsonse into Objects
+            // Use this for reading - don't auto parse the repsonse into Objects
             testresults = mongoClient.getDatabase(databaseName).getCollection(collectionName, RawBsonDocument.class);
-            if(readFromSecondariesToo){
-                //We can say read from any secondary that is no more than X millis behind in replicaiton.
-                //or 0 for anything
+            if (readFromSecondariesToo) {
+                // We can say read from any secondary that is no more than X millis behind in
+                // replicaiton.
+                // or 0 for anything
                 logger.info("Setting Read Preference to nearest");
-                testresults =   testresults.withReadPreference(ReadPreference.nearest(120,TimeUnit.SECONDS));
+                testresults = testresults.withReadPreference(ReadPreference.nearest(120, TimeUnit.SECONDS));
             }
 
-            //Use this one for writing 
+            // Use this one for writing
             testresultsw = mongoClient.getDatabase(databaseName).getCollection(collectionName);
-            
+
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
             mongoClient = null;
@@ -131,12 +133,13 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
 
     @Override
     public boolean createNewMOTResult(Long testId) {
-        if(testObj == null) return false;
+        if (testObj == null)
+            return false;
         try {
             Document newTest = new Document(testObj); // We chose to read immutable RAW documents
             newTest.put("testid", testId);
             newTest.put("_id", testId);
-           
+
             testresultsw.insertOne(newTest);
         } catch (Exception e) {
             logger.error(e.getClass().toString());
@@ -149,7 +152,7 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
     public void resetTestDatabase() {
         try {
             logger.info("Deleting records created during test");
-            //Using the PK index on _id rather than addin gone on testid
+            // Using the PK index on _id rather than addin gone on testid
             Bson testDocsQuery = Filters.gte("_id", 2000000000L);
             testresults.deleteMany(testDocsQuery);
         } catch (Exception e) {
@@ -159,9 +162,10 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
 
     @Override
     public boolean updateMOTResult() {
-        if(testObj == null) return false;
+        if (testObj == null)
+            return false;
         try {
-            //Using the PK index on _id rather than addin gone on testid
+            // Using the PK index on _id rather than addin gone on testid
             Long testId = testObj.getInt64("_id").longValue();
             Bson query = Filters.eq("_id", testId);
             Bson update = Updates.inc("testmileage", 1);
