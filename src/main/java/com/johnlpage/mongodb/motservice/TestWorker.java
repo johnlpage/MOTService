@@ -41,6 +41,8 @@ public class TestWorker implements Runnable {
         long endTime = startTime + options.getTestLength() * 1000;
 
         while (System.currentTimeMillis() < endTime) {
+            
+            /*
             int operation = ThreadLocalRandom.current().nextInt(0, READ_RATIO + UPDATE_RATIO + INSERT_RATIO);
 
             if (operation < READ_RATIO) {
@@ -54,16 +56,43 @@ public class TestWorker implements Runnable {
             } else {
 
                 this.motdal.updateMOTResult();
+            }*/
+            int idIndex = ThreadLocalRandom.current().nextInt(0, vehicleids.length);
+            
+            if(this.threadNo < options.getReadRatio())
+            {
+
+                json = this.motdal.getMOTResultInJSON("" + vehicleids[idIndex]);
             }
+            else if(this.threadNo < options.getReadRatio() + options.getCreateRatio()) 
+            {
+                
+                this.motdal.createNewMOTResult(newTestId,vehicleids[idIndex]);
+                newTestId += options.getnThreads();
+            } else {
+                this.motdal.updateMOTResult(vehicleids[idIndex]);
+            }
+
             itterations++;
         }
 
         if (threadNo == 0) {
-            logger.info(String.format("Test length %d seconds, %d total requests. Throughput %d requests per second",
+            logger.info(String.format("Test length %d seconds, %d total READ requests. Throughput %d requests per second",
                     options.getTestLength(),
-                    itterations * options.getnThreads(),
-                    itterations * options.getnThreads() / options.getTestLength()));
-            this.logger.debug(json); // This is there to ensure it's actually working
-        }
+                    itterations * options.getReadRatio(),
+                    itterations * options.getReadRatio()/ options.getTestLength()));
+          
+        } else if(threadNo == options.getReadRatio()) {
+            logger.info(String.format("Test length %d seconds, %d total CREATE requests. Throughput %d requests per second",
+            options.getTestLength(),
+            itterations * options.getCreateRatio(),
+            itterations *options.getCreateRatio() / options.getTestLength()));
+        } else if(threadNo == options.getReadRatio() + options.getCreateRatio()) {
+            logger.info(String.format("%d,%d,Test length %d seconds, %d total UPDATE requests. Throughput %d requests per second",
+            itterations,options.getUpdateRatio(),
+            options.getTestLength(),
+            itterations * options.getUpdateRatio(),
+            itterations * options.getUpdateRatio() / options.getTestLength()));
+        } 
     }
 }

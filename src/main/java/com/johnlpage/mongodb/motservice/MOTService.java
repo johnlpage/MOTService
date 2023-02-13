@@ -80,12 +80,12 @@ public class MOTService {
 				return dal.getMOTResultInJSON(request.params(":vehicleid"));
 
 			});
-			post("/result/:testid", (request, response) -> {
-				return dal.createNewMOTResult(Long.parseLong(":testid"));
+			post("/result/:vehicleid/:testid", (request, response) -> {
+				return dal.createNewMOTResult(Long.parseLong(":testid"),Long.parseLong(":vehicleid"));
 			});
 
 			patch("/result/:vehicleid", (request, response) -> {
-				return dal.updateMOTResult();
+				return dal.updateMOTResult(Long.parseLong(":vehicleid"));
 			});
 
 		}
@@ -109,7 +109,9 @@ public class MOTService {
 			ExecutorService executorService = Executors.newFixedThreadPool(options.getnThreads());
 			List<TestWorker> workers = new ArrayList<TestWorker>();
 
-			for (int threadNo = 0; threadNo < options.getnThreads(); threadNo++) {
+			int nWorkerThreads = options.getnThreads();
+
+			for (int threadNo = 0; threadNo < nWorkerThreads; threadNo++) {
 
 				// In MongoDB the database connection is thread safe, has a conneciton pool and
 				// should be a Singleton.

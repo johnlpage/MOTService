@@ -15,6 +15,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,7 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
             // Creatinng a client doesn't actually connect until it needs to so we ping the
             // server
             // This will also fail with incorrect auth - although not with No Auth
-            logger.info(mongoClient.getDatabase("admin").runCommand(new Document("ping", 1)).toJson());
+             String pingme = mongoClient.getDatabase("admin").runCommand(new Document("ping", 1)).toJson();
             // Use this for reading - don't auto parse the repsonse into Objects
             testresults = mongoClient.getDatabase(databaseName).getCollection(collectionName, RawBsonDocument.class);
             if (readFromSecondariesToo) {
@@ -116,7 +118,7 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
 
         Bson filter = Filters.empty();
         Bson projection = fields(include("vehicleid"), exclude("_id"));
-
+  
         MongoCursor<Document> resultiter = tr.find(filter).projection(projection).iterator();
 
         long[] vehicleids = new long[nDocs];
@@ -132,15 +134,19 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
     }
 
     @Override
-    public boolean createNewMOTResult(Long testId) {
+    public boolean createNewMOTResult(Long testId,Long vehicleId) {
         if (testObj == null)
-            return false;
+            {
+                getMOTResultInJSON(""+vehicleId); //Grab a template example
+            }
         try {
             Document newTest = new Document(testObj); // We chose to read immutable RAW documents
             newTest.put("testid", testId);
             newTest.put("_id", testId);
+            newTest.put("vehicleid", vehicleId);
 
-            testresultsw.insertOne(newTest);
+            InsertOneResult a = testresultsw.insertOne(newTest);
+            if(a.wasAcknowledged() == false) { logger.warn("An Insert failed to happen");}
         } catch (Exception e) {
             logger.error(e.getClass().toString());
             logger.error(e.getMessage());
@@ -160,16 +166,17 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
         }
     }
 
+    // Updating by testid (_id) is more logical as it's a specific test you would be changing
+    // But we don't have a list of testids, we do have a ist of vehicleid's  and performance
+    // will be the same
     @Override
-    public boolean updateMOTResult() {
-        if (testObj == null)
-            return false;
+    public boolean updateMOTResult(Long vehicleId) {
         try {
-            // Using the PK index on _id rather than addin gone on testid
-            Long testId = testObj.getInt64("_id").longValue();
-            Bson query = Filters.eq("_id", testId);
+
+            Bson query = Filters.eq("vehicleid", vehicleId);
             Bson update = Updates.inc("testmileage", 1);
-            testresults.updateOne(query, update);
+            UpdateResult r =  testresults.updateOne(query, update);
+            if(r.getModifiedCount() == 0) { logger.warn("An Update failed to take place");}
         } catch (Exception e) {
             logger.error(e.getMessage());
             return false;

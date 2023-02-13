@@ -15,7 +15,7 @@ public class CommandLineOptions {
 	private boolean helpOnly = false;
 	private String databaseURI = null;
 	private boolean runWebservice = false;
-	private int nThreads = 64;
+
 	private int testSeconds = 600;
 	private String destURI = null;
 	private int readRatio = 80;
@@ -65,11 +65,10 @@ public class CommandLineOptions {
 		cliopt.addOption("u", "uri", true, "Database Connection String or URI");
 		cliopt.addOption("d", "dest", true, "Destnation URIL for Miration to MongoDB");
 		cliopt.addOption("w", "webservice", false, "Run an actual webservice");
-		cliopt.addOption("t", "threads", true, String.format("Number of test threads (default %d)",nThreads));
 		cliopt.addOption("s", "seconds", true, String.format("Number of seconds to run the test for (default %d)",testSeconds));
-		cliopt.addOption("c", "createratio", true, String.format("Ratio of create operations (default %d)",createRatio));
-		cliopt.addOption("r", "readratio", true, String.format("Ratio of read operations (default %d)",readRatio));
-		cliopt.addOption("m", "updateratio", true, String.format("Ratio of update/modify operations (default %d)",updateRatio));
+		cliopt.addOption("c", "createratio", true, String.format("Number of threads doing of create operations (default %d)",createRatio));
+		cliopt.addOption("r", "readratio", true, String.format("Number of threads doing read operations (default %d)",readRatio));
+		cliopt.addOption("m", "updateratio", true, String.format("Number of threads doing update/modify operations (default %d)",updateRatio));
 		cliopt.addOption("x", "distributereads", true, "Include reading from replicas for RDBMS list URI's as comma seperated list");
 		CommandLine cmd = parser.parse(cliopt, args);
 
@@ -105,9 +104,6 @@ public class CommandLineOptions {
 			updateRatio = Integer.parseInt(cmd.getOptionValue("m"));
 		}
 
-		if (cmd.hasOption("t")) {
-			nThreads = Integer.parseInt(cmd.getOptionValue("t"));
-		}
 
 		if (cmd.hasOption("w")) {
 			runWebservice = true;
@@ -121,7 +117,7 @@ public class CommandLineOptions {
 	}
 
 	public int getnThreads() {
-		return nThreads;
+		return readRatio+createRatio+updateRatio;
 	}
 
 	public int getTestLength() {

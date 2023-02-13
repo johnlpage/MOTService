@@ -6,8 +6,8 @@ public interface MOTDataAccessInterface {
     public String getMOTResultInJSON(String identifier);
     public long[] getVehicleIdentifiers();
     public boolean initialised();
-    public boolean createNewMOTResult(Long testId);
+    public boolean createNewMOTResult(Long testId,Long vehicleid);
     public void resetTestDatabase() ;
-    public boolean updateMOTResult();
+    public boolean updateMOTResult(Long vehicleid);
 
 }

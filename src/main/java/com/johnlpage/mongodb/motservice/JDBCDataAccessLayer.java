@@ -76,7 +76,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
 
     private final String insertItemSQL = "INSERT INTO TESTITEM (TESTID,RFRID,RFRTYPE,LOCATIONID,DMARK) VALUES (?,?,?,?,?)";
 
-    private final String updateResultSQL = "UPDATE TESTRESULT SET TESTMILEAGE = TESTMILEAGE+1 WHERE TESTID= ?";
+    private final String updateResultSQL = "UPDATE TESTRESULT SET TESTMILEAGE = TESTMILEAGE+1 WHERE VEHICLEID= ?";
 
     JDBCDataAccessLayer(String URI, String replicaURIs) {
         logger = LoggerFactory.getLogger(JDBCDataAccessLayer.class);
@@ -84,7 +84,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
         try {
             if (URI.contains("mysql://")) {
                 isMySQL = true;
-                logger.info("RDBMS is MySQL");
+                
             }
             connection = DriverManager.getConnection(URI);
             connection.setAutoCommit(false);
@@ -168,9 +168,11 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
         }
     }
 
-    public boolean createNewMOTResult(Long testId) {
-        if (jsonObj == null)
-            return false; /* We havent read one */
+    public boolean createNewMOTResult(Long testId,Long vehicleId) {
+        if (jsonObj == null){
+            getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
+        }
+
         try {
 
             JSONArray items = jsonObj.optJSONArray("testitems");
@@ -184,6 +186,9 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 Object o = jsonObj.get(resultFields[c].toLowerCase());
                 if (resultFields[c].toLowerCase().equals("testid")) {
                     o = testId;
+                }
+                else if (resultFields[c].toLowerCase().equals("vehicleid")) {
+                    o = vehicleId;
                 }
                 bindGenericParam(insertResultStmt, c + 1, o);
             }
@@ -222,14 +227,13 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
         return false;
     }
 
-    public boolean updateMOTResult() {
-        if (jsonObj == null)
-            return false; /* We havent read one */
-
-        long testId = jsonObj.getLong("testid");
+     // Updating by testid  is more logical as it's a specific test you would be changing
+    // But we don't have a list of testids, we do have a ist of vehicleid's  and performance
+    // will be the same
+    public boolean updateMOTResult(Long vehicleId) {
 
         try {
-            updateStmt.setLong(1, testId);
+            updateStmt.setLong(1, vehicleId);
             updateStmt.execute();
             connection.commit();
             return true;
