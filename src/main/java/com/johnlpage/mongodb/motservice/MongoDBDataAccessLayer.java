@@ -18,6 +18,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
+import static com.mongodb.client.model.Sorts.ascending;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,10 +118,11 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
         int nDocs = (int) tr.estimatedDocumentCount(); // EDC is fine on data that doesn't have ops going on
         int idx = 0;
 
-        Bson filter = Filters.gt("vehicleid", new MinKey()); //MongoDB will only cover a query if it's already using the index
+        Bson filter = Filters.empty();
+       //MongoDB will only cover a query if it's already using the index
         Bson projection = fields(include("vehicleid"), exclude("_id"));
-        
-        MongoCursor<Document> resultiter = tr.find(filter).projection(projection).iterator();
+       
+        MongoCursor<Document> resultiter = tr.find(filter).projection(projection).sort(ascending("vehicleid")).iterator();
 
         long[] vehicleids = new long[nDocs];
         for (idx = 0; idx < vehicleids.length; idx++) {
