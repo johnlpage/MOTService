@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.bson.RawBsonDocument;
 import org.bson.conversions.Bson;
+import org.bson.types.MinKey;
 
 import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoClient;
@@ -116,9 +117,9 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
         int nDocs = (int) tr.estimatedDocumentCount(); // EDC is fine on data that doesn't have ops going on
         int idx = 0;
 
-        Bson filter = Filters.empty();
+        Bson filter = Filters.gt("_id", new MinKey()); //MongoDB will only cover a query if it's already using the index
         Bson projection = fields(include("vehicleid"), exclude("_id"));
-  
+        
         MongoCursor<Document> resultiter = tr.find(filter).projection(projection).iterator();
 
         long[] vehicleids = new long[nDocs];
