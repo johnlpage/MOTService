@@ -100,3 +100,13 @@ Test in Atlas
 ```
 java -jar bin/MOTService.jar -t 64 -u  "mongodb+srv://jlp:2efdaf4b59@speedtest.eez2n.mongodb.net"
 ```
+
+Read from all nodes
+-------------------
+
+mongodb -x 1
+
+JDBC
+
+ java -jar bin/MOTService.jar -u  "jdbc:mysql://admin:2efdaf4b59@johnlpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=true&zeroDateTimeBehavior=convertToNull" -x "jdbc:mysql://admin:2efdaf4b59@johnlpage.cluster-ro-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=true&zeroDateTimeBehavior=convertToNull" 
+
