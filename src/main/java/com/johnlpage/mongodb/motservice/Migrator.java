@@ -26,6 +26,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.result.InsertManyResult;
 
 import java.sql.ResultSetMetaData;
 
@@ -144,7 +145,10 @@ public class Migrator {
                         mongoDoc.put("_id",mongoDoc.get("testid"));
                         insertBatch.add(mongoDoc);
                         if (insertBatch.size() == 1000) {
-                            destinationCollection.insertMany(insertBatch);
+                            InsertManyResult a = destinationCollection.insertMany(insertBatch);
+                            if(a.getInsertedIds().size() != insertBatch.size()) {
+                                logger.error(String.format("Only %d of %d were inserted", a.getInsertedIds().size(),insertBatch.size()));
+                            }
                             insertBatch = new ArrayList<Document>();
                             count = count + 1000;
                             logger.info("Migrated " + count);
@@ -190,6 +194,13 @@ public class Migrator {
             testResult.close();
 
             // Write any remaining records to MongoDB
+            if (mongoDoc != null) {
+                mongoDoc.append("testitems", itemList);
+                // Also as the PK is _id in MongoDB copy testid in there
+                mongoDoc.put("_id",mongoDoc.get("testid"));
+                insertBatch.add(mongoDoc);
+            }
+            
             if (insertBatch.size() >0 ) {
                 destinationCollection.insertMany(insertBatch);
                 count = count + insertBatch.size();
