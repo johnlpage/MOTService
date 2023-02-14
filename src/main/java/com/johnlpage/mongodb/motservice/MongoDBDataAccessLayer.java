@@ -61,7 +61,7 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
                 // We can say read from any secondary that is no more than X millis behind in
                 // replicaiton.
                 // or 0 for anything
-                logger.info("Setting Read Preference to nearest");
+                logger.debug("Setting Read Preference to nearest");
                 testresults = testresults.withReadPreference(ReadPreference.nearest(120, TimeUnit.SECONDS));
             }
 
