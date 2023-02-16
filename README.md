@@ -16,10 +16,12 @@ curl -OL https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.33-1.el7.x
 tar xvf mysql-5.7.33-1.el7.x86_64.rpm-bundle.tar
 
 sudo rpm -e postfix-2.10.1-6.amzn2.0.3.x86_64
+sudo yum remove mariadb-libs
+
 
 sudo yum install -y mysql-community-common-5.7.33-1.el7.x86_64.rpm
 sudo yum install -y mysql-community-lib*
-sudo yum install -y mysql-community-client-5.7.33-1.el7.x86_64.rpm
+sudo yum install -y mysql-community-client-5.7.33-1.el7.x86_64.rpm && rm mysql-community*
 
 
 ```
@@ -71,7 +73,8 @@ mvn clean package
 Run RDS Test (and warm DB)
 --------------------------
 ```
-java -jar bin/MOTService.jar -t 64 -u  "jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=false&zeroDateTimeBehavior=convertToNull" 
+java -jar bin/MOTService.jar -u  "jdbc:mysql://admin:2efdaf4b59@johnlpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=true&zeroDateTimeBehavior=convertToNull" -s 1800
+
 
 ```
 
