@@ -18,6 +18,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.concurrent.ThreadLocalRandom;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -225,8 +227,11 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             } catch (SQLException e) {
                 logger.error(e.getMessage(), e);
             }
+            
             logger.error(ex.getMessage(), ex);
-        
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            logger.error(sw.toString());
             return false;
         }
         /* Take the last one we read (or read one ) and add a new one based on it */
