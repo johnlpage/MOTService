@@ -86,6 +86,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 isMySQL = true;
                 
             }
+            Class.forName("org.postgresql.Driver"); //Required for some reason
             connection = DriverManager.getConnection(URI);
             connection.setAutoCommit(false);
             readConnections = new ArrayList<PreparedStatement>();
@@ -349,6 +350,8 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
 
             if (isMySQL) {
                 getIdStatement.setFetchSize(Integer.MIN_VALUE);
+            } else {
+                getIdStatement.setFetchSize(200);
             }
             ResultSet idResults = getIdStatement.executeQuery(getIdSQL);
             // Only read enough to fill array

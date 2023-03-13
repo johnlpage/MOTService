@@ -65,7 +65,7 @@ sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
 sudo yum install -y apache-maven
 mvn --version
 
-export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.352.b08-2.amzn2.0.1.x86_64
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
 
 mvn clean package
 ```
@@ -77,6 +77,8 @@ java -jar bin/MOTService.jar -u  "jdbc:mysql://admin:2efdaf4b59@johnlpage.cluste
 
 
 ```
+
+
 
 Start a MongoDB Atlas cluster - using M30 (2 CPU, 8GB RAM, 40GB Disk) $0.59 per hour - no additional costs (I think )
 
@@ -113,3 +115,13 @@ JDBC
 
  java -jar bin/MOTService.jar -u  "jdbc:mysql://admin:2efdaf4b59@johnlpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=true&zeroDateTimeBehavior=convertToNull" -x "jdbc:mysql://admin:2efdaf4b59@johnlpage.cluster-ro-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT?useUnicode=true&useServerPrepStmts=true&useSSL=true&zeroDateTimeBehavior=convertToNull" 
 
+----------
+
+PostGres
+
+Run RDS Test (and warm DB)
+--------------------------
+```
+java -jar bin/MOTService.jar -u  "jdbc:postgresql://johnpage-instance-1.c41swlgcxzrp.eu-west-1.rds.amazonaws.com/mot?user=postgres&password=2efdaf4b59" -s 120
+
+```
