@@ -50,7 +50,7 @@ public class TestWorker implements Runnable {
             else if(this.threadNo < options.getReadRatio() + options.getCreateRatio()) 
             {
                 
-                this.motdal.createNewMOTResult(newTestId,vehicleids[idIndex]);
+                while(this.motdal.createNewMOTResult(newTestId,vehicleids[idIndex]) == false) {};
                 newTestId += options.getnThreads();
             } else {
                 this.motdal.updateMOTResult(vehicleids[idIndex]);

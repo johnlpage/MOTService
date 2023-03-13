@@ -149,12 +149,13 @@ public class MongoDBDataAccessLayer implements MOTDataAccessInterface {
             newTest.put("vehicleid", vehicleId);
 
             InsertOneResult a = testresultsw.insertOne(newTest);
-            if(a.wasAcknowledged() == false) { logger.warn("An Insert failed to happen");}
+            if(a.wasAcknowledged() == false) { logger.warn("An Insert failed to happen");return false;}
         } catch (Exception e) {
             logger.error(e.getClass().toString());
             logger.error(e.getMessage());
+            return false;
         }
-        return false;
+        return true;
     }
 
     @Override

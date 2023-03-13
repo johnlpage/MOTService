@@ -180,7 +180,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
         while (jsonObj == null){
             getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
             if(jsonObj.getString("testresult").startsWith("F") == false) {
-                logger.info("Looking for an example of a fail as a tempalte");
+                //Get a fail as a template - record fails as they have all the fields
                 jsonObj=null;
                 return false;
             }
@@ -235,13 +235,10 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             }
             
             logger.error(ex.getMessage(), ex);
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            logger.error(sw.toString());
             return false;
         }
         /* Take the last one we read (or read one ) and add a new one based on it */
-        return false;
+        return true;
     }
 
      // Updating by testid  is more logical as it's a specific test you would be changing
