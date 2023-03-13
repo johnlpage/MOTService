@@ -182,7 +182,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                     "TESTMILEAGE", "POSTCODEREGION", "MAKE", "MODEL", "COLOUR", "FUELTYPE", "CYLCPCTY",
                     "FIRSTUSEDATE" };
             String itemFields[] = { "TESTID", "RFRID", "RFRTYPE", "LOCATIONID", "DMARK" };
-
+            logger.info(jsonObj.toString(2));
             for (int c = 0; c < resultFields.length; c++) {
                 Object o = jsonObj.get(isMySQL?resultFields[c].toLowerCase():resultFields[c]);
                 if (resultFields[c].toLowerCase().equals("testid")) {
