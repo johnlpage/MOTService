@@ -30,6 +30,8 @@ public class TestWorker implements Runnable {
         // Insert and Update make individual calls to the server
         // So this would not be the way to test/code for bulk insert speed for example
 
+
+       
         // Timing from inside one testworker
 
         long startTime = System.currentTimeMillis(); // Cheap but less aggurate than nanotime good enough
@@ -43,7 +45,7 @@ public class TestWorker implements Runnable {
             if(this.threadNo < options.getReadRatio())
             {
 
-                json = this.motdal.getMOTResultInJSON("" + vehicleids[idIndex]);
+                this.motdal.getMOTResultInJSON("" + vehicleids[idIndex]);
             }
             else if(this.threadNo < options.getReadRatio() + options.getCreateRatio()) 
             {
