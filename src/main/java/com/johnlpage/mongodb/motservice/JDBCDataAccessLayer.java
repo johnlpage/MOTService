@@ -222,7 +222,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 logger.error(e.getMessage(), e);
             }
             logger.error(ex.getMessage(), ex);
-            logger.info(jsonObj.toString(2));
+            System.exit(1);
             return false;
         }
         /* Take the last one we read (or read one ) and add a new one based on it */
@@ -274,8 +274,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             JSONArray itemsJSON = new JSONArray();
 
             while (testResult.next()) {
-                //logger.info(metaData.toString());
-                //logger.info(testResult.toString());
+;
 
                 JSONObject itemJSON = new JSONObject();
                 for (int col = 1; col <= metaData.getColumnCount(); col++) {
@@ -308,9 +307,10 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             e.printStackTrace();
             logger.error(e.toString());
 
+       
+        }
         logger.info(jsonObj.toString(2));
         System.exit(0);
-        }
         return jsonObj.toString();
     }
 
