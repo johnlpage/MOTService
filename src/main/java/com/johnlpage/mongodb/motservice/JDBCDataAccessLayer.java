@@ -184,7 +184,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             String itemFields[] = { "TESTID", "RFRID", "RFRTYPE", "LOCATIONID", "DMARK" };
 
             for (int c = 0; c < resultFields.length; c++) {
-                Object o = jsonObj.get(resultFields[c].toLowerCase());
+                Object o = jsonObj.get(isMySQL?resultFields[c].toLowerCase():resultFields[c]);
                 if (resultFields[c].toLowerCase().equals("testid")) {
                     o = testId;
                 }
@@ -203,7 +203,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                         if (itemFields[c].toLowerCase().equals("testid")) {
                             o = testId;
                         } else {
-                            o = jo.get(itemFields[c].toLowerCase());
+                            o = jo.get(isMySQL?itemFields[c].toLowerCase():itemFields[c]);
                         }
                         bindGenericParam(insertItemStmt, c + 1, o);
                     }
