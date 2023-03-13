@@ -177,9 +177,13 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
     }
 
     public boolean createNewMOTResult(Long testId,Long vehicleId) {
-        if (jsonObj == null){
+        while (jsonObj == null){
             getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
-            
+            if(jsonObj.getString("testresult").startsWith("Fail") == false) {
+                logging.info("Looking for an example of a fail as a tempalte");
+                jsonObj=null;
+                return false;
+            }
         }
 
         try {
