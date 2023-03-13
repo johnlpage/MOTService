@@ -222,6 +222,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 logger.error(e.getMessage(), e);
             }
             logger.error(ex.getMessage(), ex);
+            logger.info(jsonObj.toString(2));
             return false;
         }
         /* Take the last one we read (or read one ) and add a new one based on it */
@@ -282,18 +283,14 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                     //logger.info(label);
                     if (firstRow && Arrays.asList(topFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
-                        if (val != null) {
-                            jsonObj.put(label.toLowerCase(), val);
-                        }
+                        jsonObj.put(label.toLowerCase(), val);
                     }
                     // All Rows add to the Items array - this is a simple JSON structure
                     // Wiith just one top level array of objects
 
                     if (Arrays.asList(itemFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
-                        if (val != null) {
-                            itemJSON.put(label.toLowerCase(), val);
-                        }
+                        itemJSON.put(label.toLowerCase(), val);
                     }
                 }
                 /* If our item isnt blank add it to the items JSONArray */
