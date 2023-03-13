@@ -151,6 +151,9 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
     }
 
     private void bindGenericParam(PreparedStatement st, int idx, Object val) throws Exception {
+        if(val == null) {
+
+        }
         switch (val.getClass().getSimpleName()) {
             case "Integer":
                 st.setInt(idx, (Integer) val);
@@ -170,8 +173,9 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
     }
 
     public boolean createNewMOTResult(Long testId,Long vehicleId) {
-        while (jsonObj == null){
+        if (jsonObj == null){
             getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
+            
         }
 
         try {
