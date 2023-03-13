@@ -172,10 +172,6 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
     public boolean createNewMOTResult(Long testId,Long vehicleId) {
         while (jsonObj == null){
             getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
-            if(jsonObj.getString("result").startsWith("Fail") == false) {
-                jsonObj = null;
-                logger.info("That one passed - trying again");
-            }
         }
 
         try {
@@ -188,7 +184,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             String itemFields[] = { "TESTID", "RFRID", "RFRTYPE", "LOCATIONID", "DMARK" };
             
             for (int c = 0; c < resultFields.length; c++) {
-                Object o = jsonObj.get(resultFields[c].toLowerCase());
+                Object o = jsonObj.opt(resultFields[c].toLowerCase());
                 if (resultFields[c].toLowerCase().equals("testid")) {
                     o = testId;
                 }
@@ -207,7 +203,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                         if (itemFields[c].toLowerCase().equals("testid")) {
                             o = testId;
                         } else {
-                            o = jo.get(itemFields[c].toLowerCase());
+                            o = jo.opt(itemFields[c].toLowerCase());
                         }
                         bindGenericParam(insertItemStmt, c + 1, o);
                     }
@@ -308,8 +304,6 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             jsonObj.put("testitems", itemsJSON); 
 
             testResult.close();
-            logger.info(jsonObj.toString(2));
-            System.exit(0);
             return jsonObj.toString();
         } catch (Exception e) {
             e.printStackTrace();
@@ -375,7 +369,6 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             return vehicleids;
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
-            System.exit(1);
         }
         return new long[0];
     }
