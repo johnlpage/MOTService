@@ -289,7 +289,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                         logger.info(val.toString());
                         jsonObj.put(label.toLowerCase(), val);
                     } else {
-                        logger.info("Field " + label + " not in topFieldNames")
+                        logger.info("Field " + label + " not in topFieldNames");
                     }
                     // All Rows add to the Items array - this is a simple JSON structure
                     // Wiith just one top level array of objects
