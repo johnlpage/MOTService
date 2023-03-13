@@ -301,7 +301,8 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             jsonObj.put("testitems", itemsJSON); 
 
             testResult.close();
-
+            logger.info(jsonObj.toString(2));
+            System.exit(0);
             return jsonObj.toString();
         } catch (Exception e) {
             e.printStackTrace();
@@ -309,8 +310,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
 
        
         }
-        logger.info(jsonObj.toString(2));
-        System.exit(0);
+       
         return jsonObj.toString();
     }
 
