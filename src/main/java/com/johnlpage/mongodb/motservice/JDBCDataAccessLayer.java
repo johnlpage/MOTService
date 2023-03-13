@@ -222,7 +222,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 logger.error(e.getMessage(), e);
             }
             logger.error(ex.getMessage(), ex);
-            System.exit(1);
+        
             return false;
         }
         /* Take the last one we read (or read one ) and add a new one based on it */
@@ -279,14 +279,12 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 JSONObject itemJSON = new JSONObject();
                 for (int col = 1; col <= metaData.getColumnCount(); col++) {
                     String label = metaData.getColumnLabel(col);
-                    logger.info(label);
+                    
                     if (firstRow && Arrays.asList(topFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
                        
                         jsonObj.put(label.toLowerCase(), val);
-                    } else {
-                        logger.info("Field " + label + " not in topFieldNames");
-                    }
+                    } 
                     // All Rows add to the Items array - this is a simple JSON structure
                     // Wiith just one top level array of objects
 
