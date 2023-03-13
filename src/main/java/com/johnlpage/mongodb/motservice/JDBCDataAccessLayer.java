@@ -273,9 +273,13 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             JSONArray itemsJSON = new JSONArray();
 
             while (testResult.next()) {
+                logger.info(metaData.toString());
+                logger.info(testResult.toString());
+
                 JSONObject itemJSON = new JSONObject();
                 for (int col = 1; col <= metaData.getColumnCount(); col++) {
                     String label = metaData.getColumnLabel(col);
+                    logger.info(label);
                     if (firstRow && Arrays.asList(topFieldNames).contains(label)) {
                         Object val = testResult.getObject(col);
                         if (val != null) {
