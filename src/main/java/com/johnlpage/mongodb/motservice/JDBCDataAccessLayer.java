@@ -170,8 +170,12 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
     }
 
     public boolean createNewMOTResult(Long testId,Long vehicleId) {
-        if (jsonObj == null){
+        while (jsonObj == null){
             getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
+            if(jsonObj.getString("result").startsWith("Fail") == false) {
+                jsonObj = null;
+                logger.info("That one passed - trying again");
+            }
         }
 
         try {
@@ -282,7 +286,10 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                     logger.info(label);
                     if (firstRow && Arrays.asList(topFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
+                        logger.info(val.toString());
                         jsonObj.put(label.toLowerCase(), val);
+                    } else {
+                        logger.info("Field " + label + " not in topFieldNames")
                     }
                     // All Rows add to the Items array - this is a simple JSON structure
                     // Wiith just one top level array of objects

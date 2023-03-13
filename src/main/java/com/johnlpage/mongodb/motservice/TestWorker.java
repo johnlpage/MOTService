@@ -30,11 +30,6 @@ public class TestWorker implements Runnable {
         // Insert and Update make individual calls to the server
         // So this would not be the way to test/code for bulk insert speed for example
 
-        int READ_RATIO = options.getReadRatio();
-        int INSERT_RATIO = options.getCreateRatio();
-        int UPDATE_RATIO = options.getUpdateRatio();
-
-        String json = new String("ERROR FETCHING JSON");
         // Timing from inside one testworker
 
         long startTime = System.currentTimeMillis(); // Cheap but less aggurate than nanotime good enough
@@ -42,21 +37,7 @@ public class TestWorker implements Runnable {
 
         while (System.currentTimeMillis() < endTime) {
             
-            /*
-            int operation = ThreadLocalRandom.current().nextInt(0, READ_RATIO + UPDATE_RATIO + INSERT_RATIO);
-
-            if (operation < READ_RATIO) {
-                int idIndex = ThreadLocalRandom.current().nextInt(0, vehicleids.length);
-
-                json = this.motdal.getMOTResultInJSON("" + vehicleids[idIndex]);
-
-            } else if (operation < READ_RATIO + UPDATE_RATIO) {
-                this.motdal.createNewMOTResult(newTestId);
-                newTestId += options.getnThreads();
-            } else {
-
-                this.motdal.updateMOTResult();
-            }*/
+           
             int idIndex = ThreadLocalRandom.current().nextInt(0, vehicleids.length);
             
             if(this.threadNo < options.getReadRatio())
