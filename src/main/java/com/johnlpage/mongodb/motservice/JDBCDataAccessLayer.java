@@ -280,7 +280,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 JSONObject itemJSON = new JSONObject();
                 for (int col = 1; col <= metaData.getColumnCount(); col++) {
                     String label = metaData.getColumnLabel(col);
-                    //logger.info(label);
+                    logger.info("METADATA: " +label);
                     if (firstRow && Arrays.asList(topFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
                         jsonObj.put(label.toLowerCase(), val);
@@ -307,7 +307,9 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.toString());
-        }
+
+        logger.info(jsonObj.toString(2));
+        System.exit(0);
         return jsonObj.toString();
     }
 
