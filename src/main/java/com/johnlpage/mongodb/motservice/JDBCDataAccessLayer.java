@@ -282,7 +282,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                     logger.info(label);
                     if (firstRow && Arrays.asList(topFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
-                        logger.info(val.toString());
+                       
                         jsonObj.put(label.toLowerCase(), val);
                     } else {
                         logger.info("Field " + label + " not in topFieldNames");
