@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.sql.ResultSetMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -154,7 +155,8 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
 
     private void bindGenericParam(PreparedStatement st, int idx, Object val) throws Exception {
         if(val == null) {
-
+            st.setNull(idx,Types.VARCHAR);
+            return;
         }
         switch (val.getClass().getSimpleName()) {
             case "Integer":
