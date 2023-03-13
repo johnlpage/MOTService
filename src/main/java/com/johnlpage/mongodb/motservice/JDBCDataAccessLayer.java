@@ -180,7 +180,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
         while (jsonObj == null){
             getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
             if(jsonObj.getString("testresult").startsWith("Fail") == false) {
-                logging.info("Looking for an example of a fail as a tempalte");
+                logger.info("Looking for an example of a fail as a tempalte");
                 jsonObj=null;
                 return false;
             }
