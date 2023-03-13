@@ -273,14 +273,14 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             JSONArray itemsJSON = new JSONArray();
 
             while (testResult.next()) {
-                logger.info(metaData.toString());
-                logger.info(testResult.toString());
+                //logger.info(metaData.toString());
+                //logger.info(testResult.toString());
 
                 JSONObject itemJSON = new JSONObject();
                 for (int col = 1; col <= metaData.getColumnCount(); col++) {
                     String label = metaData.getColumnLabel(col);
-                    logger.info(label);
-                    if (firstRow && Arrays.asList(topFieldNames).contains(label)) {
+                    //logger.info(label);
+                    if (firstRow && Arrays.asList(topFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
                         if (val != null) {
                             jsonObj.put(label.toLowerCase(), val);
@@ -289,7 +289,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                     // All Rows add to the Items array - this is a simple JSON structure
                     // Wiith just one top level array of objects
 
-                    if (Arrays.asList(itemFieldNames).contains(label)) {
+                    if (Arrays.asList(itemFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
                         if (val != null) {
                             itemJSON.put(label.toLowerCase(), val);
@@ -355,7 +355,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             if (isMySQL) {
                 getIdStatement.setFetchSize(Integer.MIN_VALUE);
             } else {
-                getIdStatement.setFetchSize(200);
+                getIdStatement.setFetchSize(5000);
             }
             ResultSet idResults = getIdStatement.executeQuery(getIdSQL);
             // Only read enough to fill array
