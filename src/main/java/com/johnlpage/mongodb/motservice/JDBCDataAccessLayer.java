@@ -279,7 +279,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 JSONObject itemJSON = new JSONObject();
                 for (int col = 1; col <= metaData.getColumnCount(); col++) {
                     String label = metaData.getColumnLabel(col);
-              
+                    logger.info(label);
                     if (firstRow && Arrays.asList(topFieldNames).contains(label.toUpperCase())) {
                         Object val = testResult.getObject(col);
                         jsonObj.put(label.toLowerCase(), val);
