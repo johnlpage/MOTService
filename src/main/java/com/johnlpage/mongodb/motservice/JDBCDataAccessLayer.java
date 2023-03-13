@@ -299,7 +299,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
                 }
                 firstRow = false;
             }
-            jsonObj.put("testitems", itemsJSON);
+            jsonObj.put("testitems", itemsJSON); 
 
             testResult.close();
 
@@ -310,6 +310,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
 
         logger.info(jsonObj.toString(2));
         System.exit(0);
+        }
         return jsonObj.toString();
     }
 
