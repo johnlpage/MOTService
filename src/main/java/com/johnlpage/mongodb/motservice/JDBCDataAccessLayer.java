@@ -361,6 +361,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             // Only read enough to fill array
             for (idx = 0; idx < vehicleids.length && idResults.next(); idx++) {
                 Long l = idResults.getLong("VEHICLEID");
+                if(idx == 0) { logger.info("Example Vehicle ID: " + l);}
                 vehicleids[idx] = l;
             }
             idResults.close();
