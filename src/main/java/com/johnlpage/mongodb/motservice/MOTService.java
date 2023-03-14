@@ -139,8 +139,10 @@ public class MOTService {
 			}
 			executorService.shutdown();
 			try {
+				logger.info("Waiting for all threads to complete");
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			} catch (InterruptedException e) {
+				logger.info(e.getMessage());
 			}
 
 		}

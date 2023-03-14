@@ -18,8 +18,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.concurrent.ThreadLocalRandom;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -182,6 +181,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             if(jsonObj.getString("testresult").startsWith("F") == false) {
                 //Get a fail as a template - record fails as they have all the fields
                 jsonObj=null;
+                logger.info("Getting a template record");
                 return false;
             }
         }
