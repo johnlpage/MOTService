@@ -181,7 +181,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
             if(jsonObj.getString("testresult").startsWith("F") == false) {
                 //Get a fail as a template - record fails as they have all the fields
                 jsonObj=null;
-                logger.info("Getting a template record");
+                
                 return false;
             }
         }

@@ -50,7 +50,8 @@ public class TestWorker implements Runnable {
             else if(this.threadNo < options.getReadRatio() + options.getCreateRatio()) 
             {
                 
-                while(this.motdal.createNewMOTResult(newTestId,vehicleids[idIndex]) == false) { logger.info("Retrying");
+                while(this.motdal.createNewMOTResult(newTestId,vehicleids[idIndex]) == false) { 
+                //Redo until we get a suitable template.
                 idIndex = ThreadLocalRandom.current().nextInt(0, vehicleids.length); 
             }
                 newTestId += options.getnThreads();
