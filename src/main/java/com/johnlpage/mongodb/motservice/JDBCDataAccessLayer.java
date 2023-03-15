@@ -154,7 +154,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
 
     private void bindGenericParam(PreparedStatement st, int idx, Object val) throws Exception {
         if(val == null) {
-            st.setNull(idx,Types.VARCHAR);
+            st.setDate(idx, null); // Sends a JDBC Null even if not a date
             return;
         }
         switch (val.getClass().getSimpleName()) {
