@@ -9,23 +9,23 @@ mv MOTService.log MOTService.log_`date +%Y%m%d%H%M%S`
 
 
 
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 80 -c 15 -m 5
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 33 -c 33 -m 33
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 0 -m 0
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 80 -c 15 -m 5 -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 33 -c 33 -m 33 -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 0 -m 0 -s 1800
 
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 80 -c 15 -m 5 -x $REPLICAS
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 33 -c 33 -m 33 -x $REPLICAS
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 0 -m 0 -x $REPLICAS
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 80 -c 15 -m 5 -x $REPLICAS -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 33 -c 33 -m 33 -x $REPLICAS -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 0 -m 0 -x $REPLICAS -s 1800
 
 
 
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 240 -c 45 -m 15
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 100 -m 100
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 300 -c 0 -m 0
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 240 -c 45 -m 15 -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 100 -m 100 -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 300 -c 0 -m 0 -s 1800
 
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 240 -c 45 -m 15 -x $REPLICAS
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 100 -m 100 -x $REPLICAS
-java -jar bin/MOTService.jar -u  $WRITEHOST -r 300 -c 0 -m 0 -x $REPLICAS
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 240 -c 45 -m 15 -x $REPLICAS -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 100 -c 100 -m 100 -x $REPLICAS -s 1800
+java -jar bin/MOTService.jar -u  $WRITEHOST -r 300 -c 0 -m 0 -x $REPLICAS -s 1800
 
 
 
