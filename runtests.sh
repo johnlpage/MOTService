@@ -1,9 +1,6 @@
-export WRITEHOST="jdbc:postgresql://johnpage-instance-1.c41swlgcxzrp.eu-west-1.rds.amazonaws.com/mot?user=postgres&password=2efdaf4b59" 
-export REPLICAS="jdbc:postgresql://johnpage.cluster-ro-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/mot?user=postgres&password=2efdaf4b59,jdbc:postgresql://ro2.cluster-custom-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/mot?user=postgres&password=2efdaf4b59"
-
 
 export WRITEHOST="jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT" 
-export REPLICAS="jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-ro-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT
+export REPLICAS="jdbc:mysql://admin:2efdaf4b59@johnpage.cluster-ro-c41swlgcxzrp.eu-west-1.rds.amazonaws.com/MOT"
 
 mv MOTService.log MOTService.log_`date +%Y%m%d%H%M%S`
 
