@@ -3,7 +3,7 @@
 # This downloads the data and loads it into MySQL
 # IT doesnt start up MySQL for you
 
-MYSQLCMD="/usr/local/mysql/bin/mysql  --local-infile -uroot -p2efdaf4b59 mot "
+export MYSQLCMD="/usr/bin/mysql  --local-infile -h johnpage.cluster-c41swlgcxzrp.eu-west-1.rds.amazonaws.com -u admin -p2efdaf4b59"
 MDB="mottest"
 
 
@@ -39,14 +39,15 @@ if [ ! -f test_result_2021.csv ]
 then
 
     unzip -n dft_test_result_2021.zip
-    cat test_result_2022/test_result*.csv | sort -n | grep -v '^"test_id"' > test_result_2021.csv
+    cat test_result_2022/test_result*.csv | sort -n | sed 's/""/\\N/g' | grep -v '^"test_id"' > test_result_2021.csv
     rm test_result_2022/test_result*.csv
 fi
 
 if [ ! -f test_item_2021.csv ]
 then
     unzip -n dft_test_item_2021.zip
-    cat test_item_2021/test_item*.csv | sort -n | grep -v '^"test_id"' > test_item_2021.csv
+    echo "Merging, sorting and deduping csv files - please be patient"
+    cat test_item_2021/test_item*.csv | sed 's/""/\\N/g' | awk -F, '{print $1","$2","$4","$3","$5 }' | sort -n |  grep -v '^"test_id"' | awk -F, '{if (!($1 == tstid && $2 == rfrid && $3 == locationid) ) {print $1","$2","$4","$3","$5 ; }; tstid=$1; rfrid=$2; locationid=$3 }' >test_item_2021.csv
     rm test_item_2021/test_item*.csv 
 fi
 
