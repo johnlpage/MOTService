@@ -178,7 +178,7 @@ public class JDBCDataAccessLayer implements MOTDataAccessInterface {
     public boolean createNewMOTResult(Long testId,Long vehicleId) {
         while (jsonObj == null){
             getMOTResultInJSON(""+vehicleId);  //We need one as a template to create new ones
-            if(jsonObj.getString("testresult").startsWith("F") == false) {
+            if(jsonObj.getString("testresult").startsWith("F") == false || jsonObj.isNull("testmileage")) {
                 //Get a fail as a template - record fails as they have all the fields
                 jsonObj=null;
                 
